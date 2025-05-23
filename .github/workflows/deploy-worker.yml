@@ -23,6 +23,8 @@ jobs:
 
       - name: Build, Load Secrets & Deploy Worker
         run: |
+          export CLOUDFLARE_API_TOKEN=${{ secrets.CF_API_TOKEN }}
+          export CLOUDFLARE_ACCOUNT_ID=${{ secrets.CF_ACCOUNT_ID }}
           npm install
           echo "${{ secrets.NPM_PACKAGE_PAT }}" | npx wrangler secret put NPM_PACKAGE_PAT
           npx wrangler deploy --minify --env production
