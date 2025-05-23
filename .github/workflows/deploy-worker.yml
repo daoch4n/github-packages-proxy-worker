@@ -1,61 +1,31 @@
-name: Deploy B2CID worker to Cloudflare
-# Workflow to deploy the B2CID worker to Cloudflare Workers
-# This ensures that the worker is deployed to https://b2cid.daokotube.workers.dev
+name: Deploy Worker
+
 on:
   push:
-    branches: [main]
+    branches:
+      - master
+  pull_request:
+  repository_dispatch:
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: ⚙️
-    environment:
-      name: cloudflare-worker
-      url: https://b2cid.daokotube.workers.dev
+    name: Deploy
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create GitHub deployment
-        uses: chrnorm/deployment-action@v2
-        id: deployment
-        with:
-          token: ${{ github.token }}
-          environment: cloudflare-worker
-          initial-status: in_progress
-          description: "Deploying B2CID worker to Cloudflare"
-
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Publish to Cloudflare Workers
-        id: deploy
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CF_WRKR_TOKEN }}
-          command: deploy
-
-      - name: Update deployment status (success)
-        if: success()
-        uses: chrnorm/deployment-status@v2
-        with:
-          token: ${{ github.token }}
-          state: success
-          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
-          environment-url: https://b2cid.daokotube.workers.dev
-          description: "Deployment successful"
-
-      - name: Update deployment status (failure)
-        if: failure()
-        uses: chrnorm/deployment-status@v2
-        with:
-          token: ${{ github.token }}
-          state: failure
-          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
-          description: "Deployment failed"
+      - name: Build, Load Secrets & Deploy Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          npm install
+          echo "${{ secrets.NPM_PACKAGE_PAT }}" | npx wrangler secret put NPM_PACKAGE_PAT
+          npx wrangler deploy --minify --env production
