@@ -29,10 +29,10 @@ export default {
 
 		// Create new headers for the forwarded request
 		const headers = new Headers(request.headers);
-		if (env.GITHUB_PAT) {
-			headers.set('Authorization', `Bearer ${env.GITHUB_PAT}`);
+		if (env.NPM_PACKAGE_PAT) {
+			headers.set('Authorization', `Bearer ${env.NPM_PACKAGE_PAT}`);
 		} else {
-			console.warn('GITHUB_PAT secret is not set. Requests to GitHub Packages may fail.');
+			console.warn('NPM_PACKAGE_PAT secret is not set. Requests to GitHub Packages may fail.');
 		}
 
 		// Forward the request to GitHub Packages
