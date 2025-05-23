@@ -21,11 +21,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Load NPM_PACKAGE_PAT secret
-        run: echo "${{ secrets.NPM_PACKAGE_PAT }}" | npx wrangler secret put NPM_PACKAGE_PAT
+      - name: Build Worker and Load Secrets
+        run: |
+          npm install
+          echo "${{ secrets.NPM_PACKAGE_PAT }}" | npx wrangler secret put NPM_PACKAGE_PAT
 
       - name: Build & Deploy Worker
         uses: cloudflare/wrangler-action@v3
