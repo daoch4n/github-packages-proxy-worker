@@ -21,11 +21,18 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Build, Load Secrets & Deploy Worker
+      - name: Install dependencies
+        run: npm install
+
+      - name: Load Secrets
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-        run: |
-          npm install
-          echo "${{ secrets.NPM_PACKAGE_PAT }}" | npx wrangler secret put NPM_PACKAGE_PAT
-          npx wrangler deploy --minify --env production
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: echo "${{ secrets.NPM_PACKAGE_PAT }}" | npx wrangler secret put NPM_PACKAGE_PAT
+
+      - name: Publish to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: 'deploy --minify --env production'
