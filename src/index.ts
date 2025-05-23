@@ -1,3 +1,5 @@
+/// <reference types="@cloudflare/workers-types" />
+
 /**
  * Welcome to Cloudflare Workers! This is your first worker.
  *
@@ -25,7 +27,8 @@ export default {
 		}
 
 		// Construct the target URL for GitHub Packages
-		const targetUrl = `${GITHUB_PACKAGES_REGISTRY}/${packageName}${url.search}`;
+		// Decode the package name to handle URL encoding issues for scoped packages (e.g., %2F to /)
+		const targetUrl = `${GITHUB_PACKAGES_REGISTRY}/${decodeURIComponent(packageName)}${url.search}`;
 
 		// Create new headers for the forwarded request
 		const headers = new Headers(request.headers);
